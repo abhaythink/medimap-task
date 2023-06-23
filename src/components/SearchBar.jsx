@@ -11,6 +11,16 @@ export const SearchBar = () => {
     setInput(value);
   }, []);
 
+  const handleKeyPress = useCallback(
+    (evt) => {
+      if (evt.key === "Enter") {
+        evt.preventDefault();
+        search(input);
+      }
+    },
+    [search, input]
+  );
+
   const handleSearchClicked = useCallback(
     (evt) => {
       evt.preventDefault();
@@ -35,6 +45,7 @@ export const SearchBar = () => {
         placeholder="TV Show Query"
         value={input}
         onChange={handleInputChanged}
+        onKeyPress={handleKeyPress}
         style={{ flex: 1 }}
       />
       <Button variant="contained" color="primary" onClick={handleSearchClicked}>
@@ -43,3 +54,4 @@ export const SearchBar = () => {
     </Box>
   );
 };
+

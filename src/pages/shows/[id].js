@@ -1,60 +1,158 @@
-
 import Rating from "src/components/Rating";
 import Schedule from "src/components/Schedule";
-import styles from "./shows.module.css";
+import { css } from "@emotion/react";
+import styled from "@emotion/styled";
 
-export async function getServerSideProps(context) {
-  const { id } = context.query;
+const containerStyles = css`
+  display: flex;
+  padding: 20px;
+  box-sizing: border-box;
 
-  const res = await fetch(`https://api.tvmaze.com/shows/${id}`)
-  const data = await res.json()
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
 
-  return { props: { data } }
-}
+const imageContainerStyles = css`
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    order: 2;
+  }
+`;
+
+const imageStyles = css`
+  width: 100%;
+  height: auto;
+`;
+
+const contentContainerStyles = css`
+  text-align: center;
+  flex: 1;
+  padding: inherit;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    order: 1;
+    text-align: center;
+  }
+`;
+
+const showInfoStyles = css`
+  padding: 20px;
+  color: black;
+  background-color: #F1F0F5;
+  border-radius: 4px;
+  margin-bottom: 35px;
+
+  @media (max-width: 768px) {
+    order: 3;
+  }
+`;
+
+const itemListStyles = css`
+  margin-top: 10px;
+  padding-left: 0;
+  list-style-type: none;
+`;
+
+const itemStyles = css`
+  margin-bottom: 5px;
+`;
+
+const Container = styled.div`
+  ${containerStyles}
+`;
+
+const ImageContainer = styled.div`
+  ${imageContainerStyles}
+`;
+
+const Image = styled.img`
+  ${imageStyles}
+`;
+
+const ContentContainer = styled.div`
+  ${contentContainerStyles}
+`;
+
+const ShowInfo = styled.div`
+  ${showInfoStyles}
+`;
+
+const ItemList = styled.ul`
+  ${itemListStyles}
+`;
+
+const Item = styled.li`
+  ${itemStyles}
+`;
 
 const ShowDetails = ({ data: show }) => {
+  const renderSummary = () => {
+    return { __html: show.summary };
+  };
+
   return (
-    <div className={styles.container}>
-      <div className={styles.imageContainer}>
-        <img src={show.image?.medium} alt={show.name} className={styles.image} />
-      </div>
-      <div className={styles.contentContainer}>
+    <Container>
+      <ImageContainer>
+        <Image
+          src={show.image?.medium || show.image?.original}
+          alt={show.name}
+        />
+      </ImageContainer>
+      <ContentContainer>
         <h1>{show.name}</h1>
-        {show.summary}
-      </div>
-      <div className={styles.showInfo}>
+        <div
+          className="summaryContainer"
+          dangerouslySetInnerHTML={renderSummary()}
+        />
+      </ContentContainer>
+      <ShowInfo>
         <h2>Show Info</h2>
-        <ul className={styles.itemList}>
-          <li className={styles.item}>
+        <ItemList className="itemList">
+          <Item className="item">
             <strong>Network:</strong> {show.network?.name} (
             {show.premiered.substring(0, 4)} - now)
-          </li>
-          <li className={styles.item}>
-            <strong>Schedule:</strong>{" "}
+          </Item>
+          <Item className="item">
+            <strong>Schedule:</strong>
             <Schedule time={show.schedule?.time} days={show.schedule?.days} />
-          </li>
-          <li className={styles.item}>
+          </Item>
+          <Item className="item">
             <strong>Status:</strong> {show.status}
-          </li>
-          <li className={styles.item}>
+          </Item>
+          <Item className="item">
             <strong>Show Type:</strong> {show.type}
-          </li>
-          <li className={styles.item}>
+          </Item>
+          <Item className="item">
             <strong>Genres:</strong> {show.genres.join(", ")}
-          </li>
-          <li className={styles.item}>
+          </Item>
+          <Item className="item">
             <strong>Official Site:</strong>
             <a href={show.officialSite}>{show.officialSite}</a>
-          </li>
-          <li>
+          </Item>
+          <Item>
             <div>
               <Rating average={show.rating?.average} />
             </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+          </Item>
+        </ItemList>
+      </ShowInfo>
+    </Container>
   );
 };
 
 export default ShowDetails;
+
+export async function getServerSideProps(context) {
+  const { id } = context.query;
+
+  const res = await fetch(`https://api.tvmaze.com/shows/${id}`);
+  const data = await res.json();
+
+  return { props: { data } };
+}
